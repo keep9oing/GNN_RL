@@ -15,6 +15,8 @@ import numpy as np
 import random
 from itertools import permutations
 
+from matplotlib import pyplot as plt
+
 import os
 os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
 
@@ -120,7 +122,7 @@ if __name__ == "__main__":
 
     # set parameters
     learning_rate = 0.0005
-    episodes = 100000
+    episodes = 100
     discount_rate = 0.99
     print_interval = 10
 
@@ -131,6 +133,7 @@ if __name__ == "__main__":
                              learning_rate=learning_rate).to(device)
 
     score = 0
+    score_list = []
 
     for epi in range(episodes):
         s = env.reset()
@@ -158,10 +161,18 @@ if __name__ == "__main__":
             step += 1
         
         Policy.train_net(discount_rate)
+        score_list.append(score)
+        score = 0.0
 
         # Logging/
         if epi%print_interval==0 and epi!=0:
-            print("# of episode :{}, avg score : {}".format(epi, score/print_interval))
-            score = 0.0
-
+            print("# of episode :{}, avg score : {}".format(epi, sum(score_list[-print_interval:])/print_interval))
+            
     env.close()
+
+    plt.plot(score_list)
+    plt.title('Reward')
+    plt.ylabel('reward')
+    plt.xlabel('episode')
+    plt.grid()
+    plt.show()
